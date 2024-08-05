@@ -40,6 +40,12 @@ export class TablesService {
   }
 
   async rejoinTable(fields: RejoinTableFields) {
-    return fields;
+    this.logger.debug(
+      `Rejoining poll with ID: ${fields.tableID} for user with ID: ${fields.userID} with name: ${fields.name}`,
+    );
+
+    const joinedPoll = await this.tablesRepository.addParticipant(fields);
+
+    return joinedPoll;
   }
 }

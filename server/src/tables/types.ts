@@ -1,3 +1,5 @@
+//service types
+
 export type CreateTableFields = {
   initialCredits: number;
   min_bet: number;
@@ -11,6 +13,22 @@ export type JoinTableFields = {
 };
 
 export type RejoinTableFields = {
+  tableID: string;
+  userID: string;
+  name: string;
+};
+
+//repository types
+export type CreateTableData = {
+  tableID: string;
+  initialCredits: number;
+  min_bet: number;
+  max_bet: number;
+  name: string;
+  userID: string;
+};
+
+export type AddParticipantData = {
   tableID: string;
   userID: string;
   name: string;

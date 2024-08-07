@@ -33,3 +33,13 @@ export type AddParticipantData = {
   userID: string;
   name: string;
 };
+
+//Guard types
+
+type AuthPayload = {
+  userID: string;
+  tableID: string;
+  name: string;
+};
+
+export type RequestWithAuth = Request & AuthPayload;

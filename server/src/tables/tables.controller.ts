@@ -1,6 +1,8 @@
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
 import { CreateTableDto, JoinTableDto } from './dtos';
 import { TablesService } from './tables.service';
+import { ControllerAuthGuard } from './guards/controller-auth.guard';
+import { RequestWithAuth } from './types';
 
 @Controller('tables')
 export class TablesController {
@@ -20,14 +22,15 @@ export class TablesController {
     return result;
   }
 
+  @UseGuards(ControllerAuthGuard)
   @Post('rejoin')
-  async rejoin() {
+  async rejoin(@Req() request: RequestWithAuth) {
     Logger.log('rejoin table');
-
+    const { tableID, name, userID } = request;
     const result = await this.tablesService.rejoinTable({
-      name: 'From token',
-      tableID: 'Also from token',
-      userID: 'Guess where this comes from?',
+      name,
+      tableID,
+      userID,
     });
     return result;
   }

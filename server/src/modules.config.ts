@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisModule } from './redis.module';
+import { JwtModule } from '@nestjs/jwt';
 
 export const redisModule = RedisModule.registerAsync({
   imports: [ConfigModule],
@@ -26,5 +27,16 @@ export const redisModule = RedisModule.registerAsync({
       },
     };
   },
+  inject: [ConfigService],
+});
+
+export const jwtModule = JwtModule.registerAsync({
+  imports: [ConfigModule],
+  useFactory: async (configService: ConfigService) => ({
+    secret: configService.get<string>('JWT_SECRET'),
+    signOptions: {
+      expiresIn: parseInt(configService.get<string>('SESSION_DURATION')),
+    },
+  }),
   inject: [ConfigService],
 });

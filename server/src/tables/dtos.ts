@@ -12,8 +12,8 @@ export class CreateTableDto {
   min_bet: number;
 
   @IsInt()
-  @Min(1)
-  @Max(1000)
+  @Min(1000)
+  @Max(100000)
   max_bet: number;
 
   @IsString()

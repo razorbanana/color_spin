@@ -1,9 +1,19 @@
-import { Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Logger,
+  Post,
+  Req,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { CreateTableDto, JoinTableDto } from './dtos';
 import { TablesService } from './tables.service';
 import { ControllerAuthGuard } from './guards/controller-auth.guard';
 import { RequestWithAuth } from './types';
 
+@UsePipes(new ValidationPipe())
 @Controller('tables')
 export class TablesController {
   constructor(private tablesService: TablesService) {}

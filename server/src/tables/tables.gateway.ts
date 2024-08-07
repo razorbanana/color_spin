@@ -1,15 +1,25 @@
-import { Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  UseFilters,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { TablesService } from './tables.service';
 import { Namespace } from 'socket.io';
 import { SocketWithAuth } from './types';
+import { WsCatchAllFilter } from 'src/exceptions/ws-catch-all-filter';
 
+@UsePipes(new ValidationPipe())
+@UseFilters(new WsCatchAllFilter())
 @WebSocketGateway({
   namespace: 'tables',
 })
@@ -41,5 +51,10 @@ export class TablesGateway
     );
     this.logger.log(`WS Client with id ${client.id} disconnected`);
     this.logger.debug(`Number of connected clients: ${sockets.size}`);
+  }
+
+  @SubscribeMessage('test')
+  async test() {
+    throw new BadRequestException(['fdkf']);
   }
 }

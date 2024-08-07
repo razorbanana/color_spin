@@ -9,4 +9,5 @@ export interface Game {
   max_bet: number;
   participants: Participants;
   adminID: string;
+  hasStarted: boolean;
 }

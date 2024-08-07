@@ -21,6 +21,17 @@ export type RejoinTableFields = {
   name: string;
 };
 
+export interface AddParticipantFields {
+  tableID: string;
+  userID: string;
+  name: string;
+}
+
+export interface RemoveParticipantFields {
+  tableID: string;
+  userID: string;
+}
+
 //repository types
 export type CreateTableData = {
   tableID: string;

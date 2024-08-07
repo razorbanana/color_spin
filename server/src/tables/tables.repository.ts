@@ -38,6 +38,7 @@ export class TablesRepository {
       name,
       participants: {},
       adminID: userID,
+      hasStarted: false,
     };
 
     this.logger.log(
@@ -109,25 +110,32 @@ export class TablesRepository {
         JSON.stringify(name),
       );
 
-      const tableJSON = await this.redisClient.send_command(
-        'JSON.GET',
-        key,
-        '.',
-      );
-
-      const poll = JSON.parse(tableJSON) as Game;
-
-      this.logger.debug(
-        `Current Participants for tableID: ${tableID}:`,
-        poll.participants,
-      );
-
-      return poll;
+      return this.getTable(tableID);
     } catch (e) {
       this.logger.error(
         `Failed to add a participant with userID/name: ${userID}/${name} to tableID: ${tableID}`,
       );
       throw e;
+    }
+  }
+
+  async removeParticipant(tableID: string, userID: string): Promise<Game> {
+    this.logger.log(
+      `Attempting to remove a participant with userID: ${userID} from tableID: ${tableID}`,
+    );
+
+    const key = `tables:${tableID}`;
+    const participantPath = `.participants.${userID}`;
+
+    try {
+      await this.redisClient.send_command('JSON.DEL', key, participantPath);
+
+      return this.getTable(tableID);
+    } catch (e) {
+      this.logger.error(
+        `Failed to remove a participant with userID: ${userID} from tableID: ${tableID}`,
+      );
+      throw new InternalServerErrorException('Failed to remove participant');
     }
   }
 }

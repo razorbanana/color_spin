@@ -35,22 +35,43 @@ export class TablesGateway
     this.logger.log(`Websocket gateway initialized`);
   }
 
-  handleConnection(client: SocketWithAuth) {
+  async handleConnection(client: SocketWithAuth) {
     const sockets = this.io.sockets;
+    const roomName = client.tableID;
+    await client.join(roomName);
+    const connectedClients = this.io.adapter.rooms?.get(roomName)?.size ?? 0;
+    this.logger.debug(`userID: ${client.userID} joined room: ${roomName}`);
+    this.logger.debug(`Number of connected sockets: ${sockets.size}`);
     this.logger.debug(
-      `Socket connected with userID: ${client.userID}, pollID: ${client.tableID}, and name: "${client.name}"`,
+      `Number of connected clients in room: ${roomName}: ${connectedClients}`,
     );
-    this.logger.log(`WS Client with id ${client.id} connected`);
-    this.logger.debug(`Number of connected clients: ${sockets.size}`);
+
+    const updatedTable = await this.tablesService.addParticipant({
+      tableID: client.tableID,
+      userID: client.userID,
+      name: client.name,
+    });
+
+    this.io.to(roomName).emit('table_updated', updatedTable);
   }
 
-  handleDisconnect(client: SocketWithAuth) {
+  async handleDisconnect(client: SocketWithAuth) {
     const sockets = this.io.sockets;
+    const { tableID, userID } = client;
+    const updatedTable = await this.tablesService.removeParticipant({
+      tableID,
+      userID,
+    });
+    const roomName = tableID;
+    const clientCount = this.io.adapter.rooms?.get(roomName)?.size ?? 0;
+    this.logger.debug(`userID: ${userID} quit room: ${roomName}`);
+    this.logger.debug(`Number of connected sockets: ${sockets.size}`);
     this.logger.debug(
-      `Socket connected with userID: ${client.userID}, pollID: ${client.tableID}, and name: "${client.name}"`,
+      `Number of connected clients in room: ${roomName}: ${clientCount}`,
     );
-    this.logger.log(`WS Client with id ${client.id} disconnected`);
-    this.logger.debug(`Number of connected clients: ${sockets.size}`);
+    if (updatedTable) {
+      this.io.to(roomName).emit('table_updated', updatedTable);
+    }
   }
 
   @SubscribeMessage('test')

@@ -1,8 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateTableFields, JoinTableFields, RejoinTableFields } from './types';
+import {
+  AddParticipantFields,
+  CreateTableFields,
+  JoinTableFields,
+  RejoinTableFields,
+  RemoveParticipantFields,
+} from './types';
 import { createTableID, createUserID } from 'src/utils/ids';
 import { TablesRepository } from './tables.repository';
 import { JwtService } from '@nestjs/jwt';
+import { Game } from 'shared';
 
 @Injectable()
 export class TablesService {
@@ -70,5 +77,25 @@ export class TablesService {
     const joinedPoll = await this.tablesRepository.addParticipant(fields);
 
     return joinedPoll;
+  }
+
+  async addParticipant(
+    addParticipantFields: AddParticipantFields,
+  ): Promise<Game> {
+    return this.tablesRepository.addParticipant(addParticipantFields);
+  }
+
+  async removeParticipant(
+    removeParticipantFields: RemoveParticipantFields,
+  ): Promise<Game | void> {
+    const { tableID, userID } = removeParticipantFields;
+    const table = await this.tablesRepository.getTable(tableID);
+    if (!table.hasStarted) {
+      const updatedTable = await this.tablesRepository.removeParticipant(
+        tableID,
+        userID,
+      );
+      return updatedTable;
+    }
   }
 }

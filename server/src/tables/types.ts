@@ -1,5 +1,8 @@
 //service types
 
+import { Socket } from 'socket.io';
+import { Request } from 'express';
+
 export type CreateTableFields = {
   initialCredits: number;
   min_bet: number;
@@ -43,3 +46,4 @@ type AuthPayload = {
 };
 
 export type RequestWithAuth = Request & AuthPayload;
+export type SocketWithAuth = Socket & AuthPayload;

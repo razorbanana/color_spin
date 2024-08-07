@@ -1,7 +1,9 @@
 import { INestApplicationContext, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions } from 'socket.io';
+import { Server, ServerOptions } from 'socket.io';
+import { SocketWithAuth } from './tables/types';
+import { JwtService } from '@nestjs/jwt';
 
 export class SocketIOAdapter extends IoAdapter {
   private readonly logger = new Logger(SocketIOAdapter.name);
@@ -28,6 +30,28 @@ export class SocketIOAdapter extends IoAdapter {
       cors,
     };
 
-    return super.createIOServer(port, optionsWithCORS);
+    const jwtService = this.app.get(JwtService);
+    const server: Server = super.createIOServer(port, optionsWithCORS);
+
+    server.of('tables').use(createTokenMiddleware(jwtService, this.logger));
+
+    return server;
   }
 }
+
+const createTokenMiddleware =
+  (jwtService: JwtService, logger: Logger) =>
+  (socket: SocketWithAuth, next) => {
+    const token =
+      socket.handshake.auth.token || socket.handshake.headers['token'];
+    logger.debug(`Validating auth token before connection: ${token}`);
+    try {
+      const payload = jwtService.verify(token);
+      socket.userID = payload.sub;
+      socket.tableID = payload.tableID;
+      socket.name = payload.name;
+      next();
+    } catch {
+      next(new Error('FORBIDDEN'));
+    }
+  };

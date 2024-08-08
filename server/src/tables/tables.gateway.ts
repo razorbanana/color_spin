@@ -18,7 +18,7 @@ import {
 } from '@nestjs/websockets';
 import { TablesService } from './tables.service';
 import { Namespace } from 'socket.io';
-import { SocketWithAuth } from './types';
+import { SocketWithAuth, UpdateParticipantCreditsData } from './types';
 import { WsCatchAllFilter } from 'src/exceptions/ws-catch-all-filter';
 import { GatewayAdminGuard } from './guards/gateway-admin.guard';
 
@@ -99,5 +99,30 @@ export class TablesGateway
     if (updatedTable) {
       this.io.to(client.tableID).emit('table_updated', updatedTable);
     }
+  }
+
+  @SubscribeMessage('update_credits')
+  async updateCredits(
+    @MessageBody('credits') credits: number,
+    @ConnectedSocket() client: SocketWithAuth,
+  ) {
+    const { tableID, userID, name } = client;
+    this.logger.debug(
+      `Attempting to update credits for userID ${userID} to amount ${credits}`,
+    );
+    const updateParticipantCreditsData: UpdateParticipantCreditsData = {
+      name,
+      tableID,
+      userID,
+      credits,
+    };
+    const updatedTable = await this.tablesService.updateParticipantCredits(
+      updateParticipantCreditsData,
+    );
+    if (updatedTable) {
+      this.io.to(tableID).emit('table_updated', updatedTable);
+    }
+
+    return true;
   }
 }

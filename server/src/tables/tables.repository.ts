@@ -8,7 +8,12 @@ import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
 import { IORedisKey } from 'src/redis.module';
 import { Game } from 'shared';
-import { AddParticipantData, CreateTableData } from './types';
+import {
+  AddParticipantData,
+  CreateParticipantData,
+  CreateTableData,
+  UpdateParticipantCreditsData,
+} from './types';
 
 @Injectable()
 export class TablesRepository {
@@ -101,13 +106,20 @@ export class TablesRepository {
 
     const key = `tables:${tableID}`;
     const participantPath = `.participants.${userID}`;
+    const table = await this.getTable(tableID);
+
+    const newParticipant: CreateParticipantData = {
+      name,
+      credits: table.initialCredits,
+      chosenColor: null,
+    };
 
     try {
       await this.redisClient.send_command(
         'JSON.SET',
         key,
         participantPath,
-        JSON.stringify(name),
+        JSON.stringify(newParticipant),
       );
 
       return this.getTable(tableID);
@@ -116,6 +128,43 @@ export class TablesRepository {
         `Failed to add a participant with userID/name: ${userID}/${name} to tableID: ${tableID}`,
       );
       throw e;
+    }
+  }
+
+  async updateParticipantCredits({
+    name,
+    userID,
+    tableID,
+    credits,
+  }: UpdateParticipantCreditsData) {
+    this.logger.log(
+      `Attempting to update credits of a participant with userID: ${userID}, new credits: ${credits}, tableID: ${tableID}`,
+    );
+
+    const key = `tables:${tableID}`;
+    const participantPath = `.participants.${userID}`;
+    const updatedParticipant = {
+      name,
+      credits,
+      chosenColor: null,
+    };
+
+    try {
+      await this.redisClient.send_command(
+        'JSON.SET',
+        key,
+        participantPath,
+        JSON.stringify(updatedParticipant),
+      );
+
+      return this.getTable(tableID);
+    } catch (e) {
+      this.logger.error(
+        `Failed to update credits of a participant with userID: ${userID}, new credits: ${credits}, tableID: ${tableID}`,
+      );
+      throw new InternalServerErrorException(
+        `Failed to update credits of a participant`,
+      );
     }
   }
 

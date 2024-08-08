@@ -5,6 +5,7 @@ import {
   JoinTableFields,
   RejoinTableFields,
   RemoveParticipantFields,
+  UpdateParticipantCreditsData,
 } from './types';
 import { createTableID, createUserID } from 'src/utils/ids';
 import { TablesRepository } from './tables.repository';
@@ -83,6 +84,14 @@ export class TablesService {
     addParticipantFields: AddParticipantFields,
   ): Promise<Game> {
     return this.tablesRepository.addParticipant(addParticipantFields);
+  }
+
+  async updateParticipantCredits(
+    updateParticipantCreditsData: UpdateParticipantCreditsData,
+  ) {
+    return this.tablesRepository.updateParticipantCredits(
+      updateParticipantCreditsData,
+    );
   }
 
   async removeParticipant(

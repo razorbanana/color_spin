@@ -48,6 +48,19 @@ export type AddParticipantData = {
   name: string;
 };
 
+export type CreateParticipantData = {
+  name: string;
+  credits: number;
+  chosenColor: string | null;
+};
+
+export type UpdateParticipantCreditsData = {
+  name: string;
+  tableID: string;
+  userID: string;
+  credits: number;
+};
+
 //Guard types
 
 export type AuthPayload = {

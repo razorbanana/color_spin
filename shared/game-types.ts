@@ -1,8 +1,8 @@
-export interface Participants {
+export type Participants = {
   [participantID: string]: string;
 }
 
-export interface Game {
+export type Game = {
   id: string;
   initialCredits: number;
   min_bet: number;

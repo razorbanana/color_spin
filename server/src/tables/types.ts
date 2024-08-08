@@ -50,7 +50,7 @@ export type AddParticipantData = {
 
 //Guard types
 
-type AuthPayload = {
+export type AuthPayload = {
   userID: string;
   tableID: string;
   name: string;

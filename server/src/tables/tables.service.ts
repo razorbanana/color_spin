@@ -98,4 +98,8 @@ export class TablesService {
       return updatedTable;
     }
   }
+
+  async getTable(tableID: string): Promise<Game> {
+    return this.tablesRepository.getTable(tableID);
+  }
 }

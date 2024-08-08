@@ -2,10 +2,13 @@ import {
   BadRequestException,
   Logger,
   UseFilters,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -17,6 +20,7 @@ import { TablesService } from './tables.service';
 import { Namespace } from 'socket.io';
 import { SocketWithAuth } from './types';
 import { WsCatchAllFilter } from 'src/exceptions/ws-catch-all-filter';
+import { GatewayAdminGuard } from './guards/gateway-admin.guard';
 
 @UsePipes(new ValidationPipe())
 @UseFilters(new WsCatchAllFilter())
@@ -77,5 +81,23 @@ export class TablesGateway
   @SubscribeMessage('test')
   async test() {
     throw new BadRequestException(['fdkf']);
+  }
+
+  @UseGuards(GatewayAdminGuard)
+  @SubscribeMessage('remove_participant')
+  async removeParticipant(
+    @MessageBody('id') id: string,
+    @ConnectedSocket() client: SocketWithAuth,
+  ) {
+    this.logger.debug(
+      `Attempting to remove participant ${id} from poll ${client.tableID}`,
+    );
+    const updatedTable = await this.tablesService.removeParticipant({
+      tableID: client.tableID,
+      userID: id,
+    });
+    if (updatedTable) {
+      this.io.to(client.tableID).emit('table_updated', updatedTable);
+    }
   }
 }

@@ -1,6 +1,12 @@
+export type Participant = {
+  name: string;
+  credits: number;
+  chosenColor: string | null;
+};
+
 export type Participants = {
-  [participantID: string]: string;
-}
+  [participantID: string]: Participant;
+};
 
 export type Game = {
   id: string;

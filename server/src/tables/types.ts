@@ -32,6 +32,18 @@ export interface RemoveParticipantFields {
   userID: string;
 }
 
+export type UpdateParticipantCreditsData = {
+  tableID: string;
+  userID: string;
+  credits: number;
+};
+
+export type UpdateParticipantChosenColor = {
+  tableID: string;
+  userID: string;
+  color: string;
+};
+
 //repository types
 export type CreateTableData = {
   tableID: string;
@@ -52,13 +64,6 @@ export type CreateParticipantData = {
   name: string;
   credits: number;
   chosenColor: string | null;
-};
-
-export type UpdateParticipantCreditsData = {
-  name: string;
-  tableID: string;
-  userID: string;
-  credits: number;
 };
 
 //Guard types

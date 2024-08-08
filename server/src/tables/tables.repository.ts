@@ -132,7 +132,6 @@ export class TablesRepository {
   }
 
   async updateParticipantCredits({
-    name,
     userID,
     tableID,
     credits,
@@ -142,19 +141,14 @@ export class TablesRepository {
     );
 
     const key = `tables:${tableID}`;
-    const participantPath = `.participants.${userID}`;
-    const updatedParticipant = {
-      name,
-      credits,
-      chosenColor: null,
-    };
+    const participantPath = `.participants.${userID}.credits`;
 
     try {
       await this.redisClient.send_command(
         'JSON.SET',
         key,
         participantPath,
-        JSON.stringify(updatedParticipant),
+        JSON.stringify(credits),
       );
 
       return this.getTable(tableID);
@@ -165,6 +159,51 @@ export class TablesRepository {
       throw new InternalServerErrorException(
         `Failed to update credits of a participant`,
       );
+    }
+  }
+
+  async chooseColor({ userID, tableID, color }) {
+    this.logger.log(
+      `Attempting to choose color of a participant with userID: ${userID}, new color: ${color}, tableID: ${tableID}`,
+    );
+    const key = `tables:${tableID}`;
+    const participantPath = `.participants.${userID}.chosenColor`;
+
+    try {
+      await this.redisClient.send_command(
+        'JSON.SET',
+        key,
+        participantPath,
+        JSON.stringify(color),
+      );
+      return this.getTable(tableID);
+    } catch (e) {
+      this.logger.error(
+        `Failed to update color of a participant with userID: ${userID}, new color: ${color}, tableID: ${tableID}`,
+        e,
+      );
+      throw new InternalServerErrorException(
+        `Failed to update color of a participant`,
+      );
+    }
+  }
+
+  async startGame(tableID: string): Promise<Game> {
+    this.logger.log(`Attempting to start game tableID: ${tableID}`);
+
+    const key = `tables:${tableID}`;
+    try {
+      await this.redisClient.send_command(
+        'JSON.SET',
+        key,
+        '.hasStarted',
+        JSON.stringify(true),
+      );
+
+      return this.getTable(tableID);
+    } catch (e) {
+      this.logger.error(`Failed to start game tableID: ${tableID}`);
+      throw new InternalServerErrorException('Failed to start game');
     }
   }
 

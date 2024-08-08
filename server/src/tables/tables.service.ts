@@ -5,6 +5,7 @@ import {
   JoinTableFields,
   RejoinTableFields,
   RemoveParticipantFields,
+  UpdateParticipantChosenColor,
   UpdateParticipantCreditsData,
 } from './types';
 import { createTableID, createUserID } from 'src/utils/ids';
@@ -110,5 +111,15 @@ export class TablesService {
 
   async getTable(tableID: string): Promise<Game> {
     return this.tablesRepository.getTable(tableID);
+  }
+
+  async startGame(tableID: string): Promise<Game> {
+    return this.tablesRepository.startGame(tableID);
+  }
+
+  async chooseColor(
+    updateParticipantChosenColor: UpdateParticipantChosenColor,
+  ) {
+    return this.tablesRepository.chooseColor(updateParticipantChosenColor);
   }
 }

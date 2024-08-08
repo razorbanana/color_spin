@@ -106,12 +106,11 @@ export class TablesGateway
     @MessageBody('credits') credits: number,
     @ConnectedSocket() client: SocketWithAuth,
   ) {
-    const { tableID, userID, name } = client;
+    const { tableID, userID } = client;
     this.logger.debug(
       `Attempting to update credits for userID ${userID} to amount ${credits}`,
     );
     const updateParticipantCreditsData: UpdateParticipantCreditsData = {
-      name,
       tableID,
       userID,
       credits,
@@ -124,5 +123,37 @@ export class TablesGateway
     }
 
     return true;
+  }
+
+  @SubscribeMessage('choose_color')
+  async chooseColor(
+    @MessageBody('color') color: string,
+    @ConnectedSocket() client: SocketWithAuth,
+  ) {
+    const { tableID, userID } = client;
+    this.logger.debug(
+      `Attempting to choose color ${color} for userID ${userID}`,
+    );
+    const updatedTable = await this.tablesService.chooseColor({
+      tableID,
+      userID,
+      color,
+    });
+    this.io.to(tableID).emit('table_updated', updatedTable);
+  }
+
+  @UseGuards(GatewayAdminGuard)
+  @SubscribeMessage('start_game')
+  async startGame(@ConnectedSocket() client: SocketWithAuth) {
+    const { tableID } = client;
+    const table = await this.tablesService.getTable(tableID);
+    const allColorsChosen = Object.values(table.participants).every(
+      (participant) => participant.chosenColor !== null,
+    );
+    if (!allColorsChosen) {
+      throw new BadRequestException('Not all users have chosen a color');
+    }
+    const updatedTable = await this.tablesService.startGame(tableID);
+    this.io.to(tableID).emit('table_updated', updatedTable);
   }
 }

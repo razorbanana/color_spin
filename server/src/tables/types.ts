@@ -44,6 +44,12 @@ export type UpdateParticipantChosenColor = {
   color: string;
 };
 
+export type UpdateParticipantBet = {
+  tableID: string;
+  userID: string;
+  bet: number;
+};
+
 //repository types
 export type CreateTableData = {
   tableID: string;
@@ -64,6 +70,7 @@ export type CreateParticipantData = {
   name: string;
   credits: number;
   chosenColor: string | null;
+  bet: number;
 };
 
 //Guard types

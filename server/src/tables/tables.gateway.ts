@@ -142,6 +142,25 @@ export class TablesGateway
     this.io.to(tableID).emit('table_updated', updatedTable);
   }
 
+  @SubscribeMessage('place_bet')
+  async placeBet(
+    @MessageBody('bet') bet: number,
+    @ConnectedSocket() client: SocketWithAuth,
+  ) {
+    const { tableID, userID } = client;
+    const table = await this.tablesService.getTable(tableID);
+    if (table.participants[userID].credits < bet) {
+      throw new BadRequestException('Not enough credits');
+    }
+    this.logger.debug(`Attempting to place bet ${bet} for userID ${userID}`);
+    const updatedTable = await this.tablesService.placeBet({
+      tableID,
+      userID,
+      bet,
+    });
+    this.io.to(tableID).emit('table_updated', updatedTable);
+  }
+
   @UseGuards(GatewayAdminGuard)
   @SubscribeMessage('start_game')
   async startGame(@ConnectedSocket() client: SocketWithAuth) {
@@ -154,6 +173,21 @@ export class TablesGateway
       throw new BadRequestException('Not all users have chosen a color');
     }
     const updatedTable = await this.tablesService.startGame(tableID);
+    this.io.to(tableID).emit('table_updated', updatedTable);
+  }
+
+  @UseGuards(GatewayAdminGuard)
+  @SubscribeMessage('end_game')
+  async endGame(
+    @MessageBody('color') color: string,
+    @ConnectedSocket() client: SocketWithAuth,
+  ) {
+    const { tableID } = client;
+    const table = await this.tablesService.getTable(tableID);
+    if (!table.hasStarted) {
+      throw new BadRequestException('Game has not started');
+    }
+    const updatedTable = await this.tablesService.endGame(tableID, color);
     this.io.to(tableID).emit('table_updated', updatedTable);
   }
 }

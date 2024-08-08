@@ -1,6 +1,7 @@
 export type Participant = {
   name: string;
   credits: number;
+  bet: number | null;
   chosenColor: string | null;
 };
 

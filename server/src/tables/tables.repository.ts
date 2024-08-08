@@ -111,6 +111,7 @@ export class TablesRepository {
     const newParticipant: CreateParticipantData = {
       name,
       credits: table.initialCredits,
+      bet: 0,
       chosenColor: null,
     };
 
@@ -188,6 +189,32 @@ export class TablesRepository {
     }
   }
 
+  async placeBet({ userID, tableID, bet }) {
+    this.logger.log(
+      `Attempting to place bet of a participant with userID: ${userID}, new bet: ${bet}, tableID: ${tableID}`,
+    );
+    const key = `tables:${tableID}`;
+    const participantPath = `.participants.${userID}.bet`;
+
+    try {
+      await this.redisClient.send_command(
+        'JSON.SET',
+        key,
+        participantPath,
+        JSON.stringify(bet),
+      );
+      return this.getTable(tableID);
+    } catch (e) {
+      this.logger.error(
+        `Failed to update bet of a participant with userID: ${userID}, new bet: ${bet}, tableID: ${tableID}`,
+        e,
+      );
+      throw new InternalServerErrorException(
+        `Failed to update bet of a participant`,
+      );
+    }
+  }
+
   async startGame(tableID: string): Promise<Game> {
     this.logger.log(`Attempting to start game tableID: ${tableID}`);
 
@@ -204,6 +231,25 @@ export class TablesRepository {
     } catch (e) {
       this.logger.error(`Failed to start game tableID: ${tableID}`);
       throw new InternalServerErrorException('Failed to start game');
+    }
+  }
+
+  async endGame(tableID: string): Promise<Game> {
+    this.logger.log(`Attempting to end game tableID: ${tableID}`);
+
+    const key = `tables:${tableID}`;
+    try {
+      await this.redisClient.send_command(
+        'JSON.SET',
+        key,
+        '.hasStarted',
+        JSON.stringify(false),
+      );
+
+      return this.getTable(tableID);
+    } catch (e) {
+      this.logger.error(`Failed to end game tableID: ${tableID}`);
+      throw new InternalServerErrorException('Failed to end game');
     }
   }
 

@@ -5,6 +5,7 @@ import {
   JoinTableFields,
   RejoinTableFields,
   RemoveParticipantFields,
+  UpdateParticipantBet,
   UpdateParticipantChosenColor,
   UpdateParticipantCreditsData,
 } from './types';
@@ -117,9 +118,45 @@ export class TablesService {
     return this.tablesRepository.startGame(tableID);
   }
 
+  async endGame(tableID: string, color: string): Promise<Game> {
+    const table = await this.tablesRepository.getTable(tableID);
+    for (const participantID of Object.keys(table.participants)) {
+      const participant = table.participants[participantID];
+
+      if (participant.chosenColor === color) {
+        participant.credits += participant.bet;
+      } else {
+        participant.credits -= participant.bet;
+      }
+
+      await this.tablesRepository.updateParticipantCredits({
+        tableID,
+        userID: participantID,
+        credits: participant.credits,
+      });
+
+      await this.tablesRepository.placeBet({
+        tableID,
+        userID: participantID,
+        bet: 0,
+      });
+
+      await this.tablesRepository.chooseColor({
+        tableID,
+        userID: participantID,
+        color: null,
+      });
+    }
+    return this.tablesRepository.endGame(tableID);
+  }
+
   async chooseColor(
     updateParticipantChosenColor: UpdateParticipantChosenColor,
   ) {
     return this.tablesRepository.chooseColor(updateParticipantChosenColor);
+  }
+
+  async placeBet(updateParticipantBet: UpdateParticipantBet) {
+    return this.tablesRepository.placeBet(updateParticipantBet);
   }
 }

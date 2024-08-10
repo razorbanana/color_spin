@@ -30,7 +30,6 @@ export class TablesRepository {
   async createTable({
     tableID,
     initialCredits,
-    min_bet,
     max_bet,
     name,
     userID,
@@ -38,7 +37,6 @@ export class TablesRepository {
     const initialTable = {
       id: tableID,
       initialCredits,
-      min_bet,
       max_bet,
       name,
       participants: {},

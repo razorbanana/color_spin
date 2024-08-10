@@ -7,12 +7,7 @@ export class CreateTableDto {
   initialCredits: number;
 
   @IsInt()
-  @Min(1)
-  @Max(1000)
-  min_bet: number;
-
-  @IsInt()
-  @Min(1000)
+  @Min(10)
   @Max(100000)
   max_bet: number;
 

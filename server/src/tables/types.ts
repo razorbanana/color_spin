@@ -5,7 +5,6 @@ import { Request } from 'express';
 
 export type CreateTableFields = {
   initialCredits: number;
-  min_bet: number;
   max_bet: number;
   name: string;
 };
@@ -54,7 +53,6 @@ export type UpdateParticipantBet = {
 export type CreateTableData = {
   tableID: string;
   initialCredits: number;
-  min_bet: number;
   max_bet: number;
   name: string;
   userID: string;

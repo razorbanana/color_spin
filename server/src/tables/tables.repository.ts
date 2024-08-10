@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -82,10 +83,9 @@ export class TablesRepository {
 
       this.logger.verbose(currentTable);
 
-      // if (currentTable?.hasStarted) {
-      //   throw new BadRequestException('The table has already started');
-      // }
-
+      if (!currentTable) {
+        throw new BadRequestException('Table not found');
+      }
       return JSON.parse(currentTable);
     } catch (e) {
       this.logger.error(`Failed to get tableID ${tableID}`);

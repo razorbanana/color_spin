@@ -63,7 +63,7 @@ const SnackBar: React.FC<SnackBarProps> = ({
       onExited={() => onClose()}
     >
       <div
-        className={`relative shadow-md py-2 mb-1 z-50 rounded-b-md text-center w-full sm:w-1/2 top-0 left-0 right-0 mx-auto bg-opacity-100 ${outerStyles}`}
+        className={`absolute shadow-md py-2 mb-1 z-50 rounded-b-md text-center w-full sm:w-1/2 top-0 left-0 right-0 mx-auto bg-opacity-100 ${outerStyles}`}
       >
         <div className="absolute top-0 right-0">
           <MdCancel

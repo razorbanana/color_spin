@@ -26,6 +26,17 @@ export const createSocketWithHandlers = ({
     console.log(
       `Connected with socket ID: ${socket.id}. UserID: ${state.me?.id} will join room ${state.game?.id}`
     );
+    actions.stopLoading();
+  });
+
+  socket.on(`connect_error`, (error) => {
+    console.error(`Connection error ${JSON.stringify(error)}`);
+    actions.stopLoading();
+  });
+
+  socket.on(`table_updated`, (table) => {
+    console.log(`Table updated: ${JSON.stringify(table)}`);
+    actions.updateGame(table);
   });
   return socket;
 };

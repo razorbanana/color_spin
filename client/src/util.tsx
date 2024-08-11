@@ -18,7 +18,7 @@ type TokenPayload = {
   exp: number;
   sub: string;
   name: string;
-  pollID: string;
+  tableID: string;
 };
 
 export const getTokenPayload = (accessToken: string): TokenPayload =>

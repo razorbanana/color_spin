@@ -69,6 +69,9 @@ const actions = {
   initializeGame: (game: Game): void => {
     state.game = game;
   },
+  updateGame: (game: Game): void => {
+    state.game = game;
+  },
   setGameAccessToken: (accessToken?: string): void => {
     state.accessToken = accessToken;
   },
@@ -87,10 +90,8 @@ const actions = {
 };
 
 subscribeKey(state, 'accessToken', () => {
-  if (state.accessToken && state.game) {
+  if (state.accessToken) {
     localStorage.setItem('accessToken', state.accessToken);
-  } else {
-    localStorage.removeItem('accessToken');
   }
 });
 

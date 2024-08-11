@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Welcome from './pages/Welcome';
-import { AppPage, state } from './state';
+import { actions, AppPage, state } from './state';
 import { Create } from './pages/Create';
 import { Join } from './pages/Join';
 import { CSSTransition } from 'react-transition-group';
@@ -16,6 +16,12 @@ const routeConfig = {
 
 export const Pages: React.FC = () => {
   const currentState = useSnapshot(state);
+
+  useEffect(() => {
+    if (currentState.me?.id) {
+      actions.setPage(AppPage.WaitingRoom);
+    }
+  }, [currentState.me?.id]);
   return (
     <>
       {Object.entries(routeConfig).map(([page, Component]) => (

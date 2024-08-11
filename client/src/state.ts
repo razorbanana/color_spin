@@ -1,7 +1,9 @@
 import { Game } from 'shared';
-import { proxy } from 'valtio';
+import { proxy, ref } from 'valtio';
 import { derive, subscribeKey } from 'valtio/utils';
 import { getTokenPayload } from './util';
+import { Socket } from 'socket.io-client';
+import { createSocketWithHandlers, socketIOUrl } from './socket-io';
 
 export enum AppPage {
   Welcome = 'welcome',
@@ -21,6 +23,7 @@ export type AppState = {
   isLoading: boolean;
   game?: Game;
   accessToken?: string;
+  socket?: Socket;
 };
 
 const state: AppState = proxy({
@@ -72,6 +75,15 @@ const actions = {
   stopLoading: (): void => {
     state.isLoading = false;
   },
+  initializeSocket: (): void => {
+    if (!state.socket) {
+      state.socket = ref(
+        createSocketWithHandlers({ socketIOUrl, state, actions })
+      );
+    } else {
+      state.socket.connect();
+    }
+  },
 };
 
 subscribeKey(state, 'accessToken', () => {
@@ -81,5 +93,7 @@ subscribeKey(state, 'accessToken', () => {
     localStorage.removeItem('accessToken');
   }
 });
+
+export type AppActions = typeof actions;
 
 export { stateWithComputed as state, actions };

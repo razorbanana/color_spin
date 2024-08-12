@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { actions, AppActions, AppState } from './state';
+import { AppActions, AppState } from './state';
 
 export const socketIOUrl = `http://${import.meta.env.VITE_API_HOST}:${
   import.meta.env.VITE_API_PORT
@@ -31,7 +31,19 @@ export const createSocketWithHandlers = ({
 
   socket.on(`connect_error`, (error) => {
     console.error(`Connection error ${JSON.stringify(error)}`);
+    actions.addWsError({
+      type: `Connection error`,
+      message: `Failed to connect`,
+    });
     actions.stopLoading();
+  });
+
+  socket.on(`exception`, (error) => {
+    console.error(`Exception: ${JSON.stringify(error)}`);
+    actions.addWsError({
+      type: `Ws Exception`,
+      message: error.message,
+    });
   });
 
   socket.on(`table_updated`, (table) => {

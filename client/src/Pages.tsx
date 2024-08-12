@@ -18,7 +18,7 @@ export const Pages: React.FC = () => {
   const currentState = useSnapshot(state);
 
   useEffect(() => {
-    if (currentState.me?.id) {
+    if (currentState.me?.id && currentState.game) {
       actions.setPage(AppPage.WaitingRoom);
     }
   }, [currentState.me?.id]);

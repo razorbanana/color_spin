@@ -122,11 +122,15 @@ export class TablesService {
     const table = await this.tablesRepository.getTable(tableID);
     for (const participantID of Object.keys(table.participants)) {
       const participant = table.participants[participantID];
-
-      if (participant.chosenColor === color) {
-        participant.credits += participant.bet;
-      } else {
-        participant.credits -= participant.bet;
+      if (
+        participant.chosenColor !== null &&
+        participant.chosenColor !== 'none'
+      ) {
+        if (participant.chosenColor === color) {
+          participant.credits += participant.bet;
+        } else {
+          participant.credits -= participant.bet;
+        }
       }
 
       await this.tablesRepository.updateParticipantCredits({

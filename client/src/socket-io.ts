@@ -1,6 +1,5 @@
 import { io, Socket } from 'socket.io-client';
 import { AppActions, AppState } from './state';
-import { Participant } from 'shared';
 
 export const socketIOUrl = `http://${import.meta.env.VITE_API_HOST}:${
   import.meta.env.VITE_API_PORT

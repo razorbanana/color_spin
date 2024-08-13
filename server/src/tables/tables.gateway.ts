@@ -178,13 +178,6 @@ export class TablesGateway
   @SubscribeMessage('start_game')
   async startGame(@ConnectedSocket() client: SocketWithAuth) {
     const { tableID } = client;
-    const table = await this.tablesService.getTable(tableID);
-    const allColorsChosen = Object.values(table.participants).every(
-      (participant) => participant.chosenColor !== null,
-    );
-    if (!allColorsChosen) {
-      throw new BadRequestException('Not all users have chosen a color');
-    }
     const updatedTable = await this.tablesService.startGame(tableID);
     this.io.to(tableID).emit('table_updated', updatedTable);
   }

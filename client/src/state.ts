@@ -133,7 +133,7 @@ const actions = {
     state.socket?.emit('start_game');
     let counter = state.gameNumber;
     while (true) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 250));
       if (Math.random() < 0.02) {
         break;
       }

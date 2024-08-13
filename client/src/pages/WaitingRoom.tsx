@@ -15,7 +15,7 @@ export enum TextColor {
 export const WaitingRoom: React.FC = () => {
   const currentState = useSnapshot(state);
   const [bet, setBet] = React.useState(0);
-  const [color, setColor] = React.useState('null');
+  const [color, setColor] = React.useState('none');
   const chosenColor: RouletteColor | null =
     currentState.me && currentState.game?.participants[currentState.me?.id]
       ? currentState.game?.participants[currentState.me?.id].chosenColor
@@ -120,7 +120,7 @@ export const WaitingRoom: React.FC = () => {
             value={color}
             className="box w-1/3"
           >
-            <option value="null">Null</option>
+            <option value="none">None</option>
             <option
               value="red"
               className={`${RouletteColorBackgroundStyle.red} text-slate-100`}
@@ -146,7 +146,7 @@ export const WaitingRoom: React.FC = () => {
             actions.placeBet(bet);
             actions.chooseColor(color);
             setBet(0);
-            setColor('null');
+            setColor('none');
           }}
           className="box btn-orange w-32 my-2"
         >

@@ -1,7 +1,7 @@
 import { Game } from 'shared';
 import { proxy, ref } from 'valtio';
 import { derive, subscribeKey } from 'valtio/utils';
-import { getTokenPayload } from './util';
+import { getTokenPayload, rouletteColor } from './util';
 import { Socket } from 'socket.io-client';
 import { createSocketWithHandlers, socketIOUrl } from './socket-io';
 import { nanoid } from 'nanoid';
@@ -13,7 +13,7 @@ export enum AppPage {
   WaitingRoom = 'waiting-room',
 }
 
-type Me = {
+export type Participant = {
   id: string;
   name: string;
 };
@@ -28,9 +28,10 @@ type WsErrorUnique = WsError & {
 };
 
 export type AppState = {
-  me?: Me;
+  me?: Participant;
   currentPage: AppPage;
   isLoading: boolean;
+  gameNumber: number;
   game?: Game;
   accessToken?: string;
   socket?: Socket;
@@ -38,12 +39,13 @@ export type AppState = {
 };
 
 const state: AppState = proxy({
+  gameNumber: 0,
   currentPage: AppPage.Welcome,
   isLoading: false,
   wsErrors: [],
 });
 
-const stateWithComputed: AppState = derive(
+const stateWithComputed = derive(
   {
     me: (get) => {
       const accessToken = get(state).accessToken;
@@ -62,6 +64,9 @@ const stateWithComputed: AppState = derive(
       }
       return get(state).me?.id === get(state).game?.adminID;
     },
+    gameColor: (get) => {
+      return rouletteColor(get(state).gameNumber);
+    },
   },
   {
     proxy: state,
@@ -72,8 +77,21 @@ const actions = {
   setPage: (page: AppPage): void => {
     state.currentPage = page;
   },
+  setGameNumber: (number: number): void => {
+    state.gameNumber = number;
+  },
   startOver: (): void => {
+    actions.reset();
+    localStorage.removeItem('accessToken');
     actions.setPage(AppPage.Welcome);
+  },
+  reset: (): void => {
+    state.socket?.disconnect();
+    state.game = undefined;
+    state.accessToken = undefined;
+    state.isLoading = false;
+    state.socket = undefined;
+    state.wsErrors = [];
   },
   startLoading: (): void => {
     state.isLoading = true;
@@ -98,6 +116,31 @@ const actions = {
     } else {
       state.socket.connect();
     }
+  },
+  placeBet: (bet: number): void => {
+    state.socket?.emit('place_bet', { bet });
+  },
+  chooseColor: (color: string): void => {
+    state.socket?.emit('choose_color', { color });
+  },
+  updateCredits: (credits: number): void => {
+    state.socket?.emit('update_credits', { credits });
+  },
+  removeParticipant: (id: string): void => {
+    state.socket?.emit('remove_participant', { id });
+  },
+  startGame: async () => {
+    state.socket?.emit('start_game');
+    let counter = state.gameNumber;
+    while (true) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (Math.random() < 0.02) {
+        break;
+      }
+      counter = (counter + 1) % 37;
+      state.socket?.emit('roulette_number', { number: counter });
+    }
+    state.socket?.emit('end_game', { color: stateWithComputed.gameColor });
   },
   addWsError: (error: WsError): void => {
     state.wsErrors = [...state.wsErrors, { ...error, id: nanoid(6) }];

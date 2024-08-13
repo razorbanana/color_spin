@@ -92,6 +92,7 @@ export class TablesGateway
     this.logger.debug(
       `Attempting to remove participant ${id} from poll ${client.tableID}`,
     );
+    this.io.to(client.tableID).emit('participant_removed', id);
     const updatedTable = await this.tablesService.removeParticipant({
       tableID: client.tableID,
       userID: id,
@@ -101,6 +102,7 @@ export class TablesGateway
     }
   }
 
+  @UseGuards(GatewayAdminGuard)
   @SubscribeMessage('update_credits')
   async updateCredits(
     @MessageBody('credits') credits: number,
@@ -131,6 +133,12 @@ export class TablesGateway
     @ConnectedSocket() client: SocketWithAuth,
   ) {
     const { tableID, userID } = client;
+    const table = await this.tablesService.getTable(tableID);
+    if (table.hasStarted) {
+      throw new BadRequestException(
+        'You can`t change your color after game has started',
+      );
+    }
     this.logger.debug(
       `Attempting to choose color ${color} for userID ${userID}`,
     );
@@ -149,6 +157,11 @@ export class TablesGateway
   ) {
     const { tableID, userID } = client;
     const table = await this.tablesService.getTable(tableID);
+    if (table.hasStarted) {
+      throw new BadRequestException(
+        'You can`t change your bet after game has started',
+      );
+    }
     if (table.participants[userID].credits < bet) {
       throw new BadRequestException('Not enough credits');
     }
@@ -189,5 +202,14 @@ export class TablesGateway
     }
     const updatedTable = await this.tablesService.endGame(tableID, color);
     this.io.to(tableID).emit('table_updated', updatedTable);
+  }
+
+  @UseGuards(GatewayAdminGuard)
+  @SubscribeMessage('roulette_number')
+  async gameNumber(
+    @MessageBody('number') number: number,
+    @ConnectedSocket() client: SocketWithAuth,
+  ) {
+    this.io.to(client.tableID).emit('game_number', number);
   }
 }

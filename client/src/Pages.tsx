@@ -21,7 +21,7 @@ export const Pages: React.FC = () => {
     if (currentState.me?.id && currentState.game) {
       actions.setPage(AppPage.WaitingRoom);
     }
-  }, [currentState.me?.id]);
+  }, [currentState.me?.id, currentState.game]);
   return (
     <>
       {Object.entries(routeConfig).map(([page, Component]) => (
@@ -35,7 +35,7 @@ export const Pages: React.FC = () => {
             node.addEventListener('transitionend', done, false);
           }}
         >
-          <div className="page mobile-height max-w-screen-sm mx-auto py-8 px-4 overflow-y-auto">
+          <div className="page h-full mx-auto py-8 px-4 overflow-y-auto">
             <Component />
           </div>
         </CSSTransition>

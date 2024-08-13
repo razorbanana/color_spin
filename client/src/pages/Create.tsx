@@ -53,7 +53,6 @@ export const Create: React.FC = () => {
       actions.setGameAccessToken(data.accessToken);
       actions.setPage(AppPage.WaitingRoom);
     }
-
     actions.stopLoading();
   };
 

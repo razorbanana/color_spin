@@ -1,48 +1,42 @@
 import React from 'react';
-import { MdClose } from 'react-icons/md';
-import BottomSheet, { BottemSheetProps } from './ui/BottomSheet';
-import { Participants } from 'shared/poll-types';
+import { Participants } from 'shared';
 
-type ParticipantListProps = {
-  participants?: Participants;
-  userID?: string;
-  isAdmin: boolean;
-  onRemoveParticipant: (id: string) => void;
-} & BottemSheetProps;
-
-const ParticipantList: React.FC<ParticipantListProps> = ({
-  isOpen,
-  onClose,
-  participants = {},
-  onRemoveParticipant,
+export const ParticipantList = ({
+  participants,
   userID,
   isAdmin,
-}) => (
-  <BottomSheet isOpen={isOpen} onClose={onClose}>
-    <div className="px-8 flex flex-wrap justify-center mb-2">
+  onRemoveParticipant,
+}: {
+  isOpen: boolean;
+  participants: Participants;
+  userID: string | undefined;
+  isAdmin: boolean;
+  onRemoveParticipant: (id: string) => void;
+}) => {
+  return (
+    <div className="absolute w-1/3 left-0 top-0 bg-slate-200 h-full">
+      <h2 className="text-2xl m-6">Participants</h2>
       {Object.entries(participants).map(([id, participant]) => (
-        <div
-          key={id}
-          className="mx-1 my-1 p-4 shadow-xl bg-white flex justify-between items-center rounded-md"
-        >
-          <span className="ml-2 mr-1 text-indigo-700 text-xl text-center">
-            {participant}
+        <div key={id} className="m-6 box flex justify-evenly">
+          <span className="mr-3">{participant.name}</span>
+          <span className="text-orange-600 mx-3">{participant.credits}</span>
+          <span
+            className={`text-${
+              participant.chosenColor ? participant.chosenColor : 'grey'
+            }-600 mx-3`}
+          >
+            {participant.chosenColor ? participant.chosenColor : 'None'}
           </span>
-          {isAdmin && userID !== id && (
-            <span
-              className="ml-1 mr-2 cursor-pointer"
+          {isAdmin && id !== userID ? (
+            <button
               onClick={() => onRemoveParticipant(id)}
+              className="box btn-purple right-0"
             >
-              <MdClose
-                className="fill-current text-black align-middle"
-                size={18}
-              />
-            </span>
-          )}
+              Remove
+            </button>
+          ) : null}
         </div>
       ))}
     </div>
-  </BottomSheet>
-);
-
-export default ParticipantList;
+  );
+};

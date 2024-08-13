@@ -1,8 +1,15 @@
+export enum RouletteColor {
+  red = 'red',
+  black = 'black',
+  green = 'green',
+  none = 'none',
+}
+
 export type Participant = {
   name: string;
   credits: number;
   bet: number | null;
-  chosenColor: string | null;
+  chosenColor: RouletteColor | null;
 };
 
 export type Participants = {

@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { AppActions, AppState } from './state';
+import { Participant } from 'shared';
 
 export const socketIOUrl = `http://${import.meta.env.VITE_API_HOST}:${
   import.meta.env.VITE_API_PORT
@@ -50,5 +51,16 @@ export const createSocketWithHandlers = ({
     console.log(`Table updated: ${JSON.stringify(table)}`);
     actions.updateGame(table);
   });
+
+  socket.on(`participant_removed`, (id) => {
+    if (state.me?.id === id) {
+      actions.startOver();
+    }
+  });
+
+  socket.on('game_number', (gameNumber) => {
+    actions.setGameNumber(gameNumber);
+  });
+
   return socket;
 };
